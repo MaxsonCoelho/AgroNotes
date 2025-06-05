@@ -1,0 +1,53 @@
+import React from 'react';
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
+import { theme } from '@/theme';
+
+interface Props {
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+}
+
+export const Button = ({ label, onPress, disabled, style, textStyle }: Props) => {
+  return (
+    <TouchableOpacity
+      style={[
+        styles.button,
+        disabled && styles.disabled,
+        style,
+      ]}
+      activeOpacity={0.7}
+      onPress={onPress}
+      disabled={disabled}
+    >
+      <Text style={[styles.text, textStyle]}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
+
+const styles = StyleSheet.create({
+  button: {
+    backgroundColor: theme.colors.primary,
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.lg,
+    borderRadius: theme.radius.md,
+    alignItems: 'center',
+  },
+  text: {
+    color: theme.colors.shape,
+    fontSize: theme.typography.body.fontSize,
+    fontWeight: theme.typography.body.fontWeight as any,
+    fontFamily: theme.typography.fontFamily,
+  },
+  disabled: {
+    backgroundColor: theme.colors.border,
+  },
+});
