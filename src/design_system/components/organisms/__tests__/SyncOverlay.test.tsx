@@ -1,37 +1,26 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
-import { FormTextArea } from '../../molecules/FormTextArea';
+import { render } from '@testing-library/react-native';
+import { SyncOverlay } from '../SyncOverlay';
 
-describe('FormTextArea', () => {
-  it('deve renderizar o label e o valor inicial', () => {
-    const { getByText, getByDisplayValue } = render(
-      <FormTextArea
-        label="Descrição"
-        value="Texto inicial"
-        onChangeText={jest.fn()}
-        placeholder="Digite aqui"
-      />
-    );
+jest.mock('@/design_system/components', () => {
+  const { View, Text, ActivityIndicator } = require('react-native');
 
-    expect(getByText('Descrição')).toBeTruthy();
-    expect(getByDisplayValue('Texto inicial')).toBeTruthy();
+  return {
+    Text: ({ children, style }: any) => <Text style={style}>{children}</Text>,
+    LoadingIndicator: () => <ActivityIndicator testID="LoadingIndicator" />,
+  };
+});
+
+describe('SyncOverlay', () => {
+  it('não deve renderizar nada quando visible é false', () => {
+    const { queryByTestId, queryByText } = render(<SyncOverlay visible={false} />);
+    expect(queryByTestId('LoadingIndicator')).toBeNull();
+    expect(queryByText(/Sincronização/)).toBeNull();
   });
 
-  it('deve chamar onChangeText ao alterar o texto', () => {
-    const mockOnChange = jest.fn();
-
-    const { getByPlaceholderText } = render(
-      <FormTextArea
-        label="Observações"
-        value=""
-        onChangeText={mockOnChange}
-        placeholder="Digite algo..."
-      />
-    );
-
-    const input = getByPlaceholderText('Digite algo...');
-    fireEvent.changeText(input, 'Novo texto');
-
-    expect(mockOnChange).toHaveBeenCalledWith('Novo texto');
+  it('deve renderizar o overlay com indicador e texto quando visible é true', () => {
+    const { getByTestId, getByText } = render(<SyncOverlay visible={true} />);
+    expect(getByTestId('LoadingIndicator')).toBeTruthy();
+    expect(getByText('Sincronização em andamento...')).toBeTruthy();
   });
 });
