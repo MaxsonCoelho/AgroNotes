@@ -1,10 +1,10 @@
-import { lightColors } from './colors';
+import { lightColors as colors } from './colors'; 
 import { spacing } from './spacing';
 import { typography } from './typography';
 import { radius } from './radius';
 
 export const theme = {
-  colors: lightColors,
+  colors,
   spacing,
   typography,
   radius,
