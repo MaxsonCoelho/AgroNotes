@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
-import { Text } from '@/components';
+import { Text } from '@/design_system/components';
 import { theme } from '@/design_system/theme';
-import { LoadingIndicator } from '@/components';
+import { LoadingIndicator } from '@/design_system/components';
 
 interface Props {
   visible: boolean;

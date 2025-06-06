@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Button, FormTextArea, Divider } from '@/components';
+import { Button, FormTextArea, Divider } from '@/design_system/components';
 import { theme } from '@/design_system/theme';
 
 interface Props {

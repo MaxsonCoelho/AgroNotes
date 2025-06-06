@@ -19,6 +19,7 @@ interface Props {
 export const Button = ({ label, onPress, disabled, style, textStyle }: Props) => {
   return (
     <TouchableOpacity
+      testID="icon-button"
       style={[
         styles.button,
         disabled && styles.disabled,

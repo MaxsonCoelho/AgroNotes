@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 
-import { MapPin, IconButton } from '@/components';
+import { MapPin, IconButton } from '@/design_system/components';
 import { Note } from '@/modules/Notes/types/noteTypes';
 import { theme } from '@/design_system/theme';
 

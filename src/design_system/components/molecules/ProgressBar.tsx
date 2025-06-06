@@ -12,6 +12,7 @@ export const ProgressBar = ({ progress }: Props) => {
   return (
     <View style={styles.container}>
       <Animated.View
+        testID="progress-bar"
         style={[styles.bar, { width: `${progress * 100}%` }]}
       />
     </View>

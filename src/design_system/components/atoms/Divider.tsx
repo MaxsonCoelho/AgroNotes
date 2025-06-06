@@ -14,6 +14,7 @@ export const Divider = ({
   marginVertical = theme.spacing.md,
 }: Props) => (
   <View
+    testID="divider"
     style={[
       styles.divider,
       {

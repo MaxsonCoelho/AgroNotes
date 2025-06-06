@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
-import { Text } from '@/components/atoms/Text';
-import { TextArea } from '@/components/atoms/TextArea';
+import { Text } from '@/design_system/components/atoms/Text';
+import { TextArea } from '@/design_system/components/atoms/TextArea';
 import { theme } from '@/design_system/theme';
 
 interface Props {

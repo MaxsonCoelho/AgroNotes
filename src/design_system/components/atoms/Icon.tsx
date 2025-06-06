@@ -19,6 +19,7 @@ const icons = {
 type IconName = keyof typeof icons;
 
 interface Props extends SvgProps {
+
   name: IconName;
   size?: number;
 }
@@ -27,7 +28,7 @@ export const Icon = ({ name, size = 24, ...rest }: Props) => {
   const SvgIcon = icons[name];
   return (
     <View style={{ width: size, height: size }}>
-      <SvgIcon width={size} height={size} {...rest} />
+      <SvgIcon testID="icon-svg" width={size} height={size} {...rest} />
     </View>
   );
 };

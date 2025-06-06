@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
-import { Icon } from '@/components/atoms/Icon';
+import { Icon } from '@/design_system/components/atoms/Icon';
 import { theme } from '@/design_system/theme';
 
 interface Props {
@@ -20,6 +20,7 @@ export const IconButton = ({
 }: Props) => {
   return (
     <TouchableOpacity
+      testID="icon-button"
       onPress={onPress}
       style={[
         styles.container,
