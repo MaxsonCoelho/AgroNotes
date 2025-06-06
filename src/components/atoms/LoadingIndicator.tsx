@@ -1,0 +1,16 @@
+import React from 'react';
+import { ActivityIndicator, ActivityIndicatorProps } from 'react-native';
+import { theme } from '@/theme';
+
+interface Props extends ActivityIndicatorProps {
+  size?: 'small' | 'large';
+  color?: string;
+}
+
+export const LoadingIndicator = ({
+  size = 'large',
+  color = theme.colors.primary,
+  ...rest
+}: Props) => {
+  return <ActivityIndicator size={size} color={color} {...rest} />;
+};

@@ -1,11 +1,5 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
+import { createTables } from '@/sync';
+import React, { useEffect } from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   ScrollView,
@@ -71,6 +65,10 @@ function App(): React.JSX.Element {
    * https://github.com/react-native-community/discussions-and-proposals/discussions/827
    */
   const safePadding = '5%';
+
+  useEffect(() => {
+    createTables();
+  }, []);
 
   return (
     <View style={backgroundStyle}>
