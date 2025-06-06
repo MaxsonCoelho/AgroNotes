@@ -5,7 +5,7 @@ import {
   TextInputProps,
   View,
 } from 'react-native';
-import { theme } from '@/theme';
+import { theme } from '@/design_system/theme';
 
 export const TextArea = (props: TextInputProps) => {
   return (

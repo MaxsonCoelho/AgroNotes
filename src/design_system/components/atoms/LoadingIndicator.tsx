@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, ActivityIndicatorProps } from 'react-native';
-import { theme } from '@/theme';
+import { theme } from '@/design_system/theme';
 
 interface Props extends ActivityIndicatorProps {
   size?: 'small' | 'large';

@@ -6,7 +6,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { theme } from '@/theme';
+import { theme } from '@/design_system/theme';
 
 interface Props {
   label: string;

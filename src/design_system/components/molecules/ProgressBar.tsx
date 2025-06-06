@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import { theme } from '@/theme';
+import { theme } from '@/design_system/theme';
 
 interface Props {
   progress: number; // de 0 a 1

@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { Icon } from '@/components/atoms/Icon';
-import { theme } from '@/theme';
+import { theme } from '@/design_system/theme';
 
 interface Props {
   icon: 'add' | 'sync' | 'back'; 

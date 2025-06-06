@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Text } from '@/components';
-import { theme } from '@/theme';
+import { theme } from '@/design_system/theme';
 import { LoadingIndicator } from '@/components';
 
 interface Props {

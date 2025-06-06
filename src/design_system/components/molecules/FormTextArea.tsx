@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text } from '@/components/atoms/Text';
 import { TextArea } from '@/components/atoms/TextArea';
-import { theme } from '@/theme';
+import { theme } from '@/design_system/theme';
 
 interface Props {
   label: string;

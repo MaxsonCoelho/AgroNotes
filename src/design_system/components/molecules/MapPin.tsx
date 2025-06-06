@@ -2,7 +2,7 @@ import React from 'react';
 import MapboxGL from '@rnmapbox/maps';
 import { View, StyleSheet } from 'react-native';
 import { Note } from '@/modules/Notes/types/noteTypes';
-import { theme } from '@/theme';
+import { theme } from '@/design_system/theme';
 
 interface Props {
   note: Note;

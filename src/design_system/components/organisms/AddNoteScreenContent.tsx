@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button, FormTextArea, Divider } from '@/components';
-import { theme } from '@/theme';
+import { theme } from '@/design_system/theme';
 
 interface Props {
   annotation: string;

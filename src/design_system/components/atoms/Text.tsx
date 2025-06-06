@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text as RNText, StyleSheet, TextProps } from 'react-native';
-import { theme } from '@/theme';
+import { theme } from '@/design_system/theme';
 
 type Variant = 'heading' | 'body' | 'caption';
 
