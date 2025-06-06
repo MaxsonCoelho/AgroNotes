@@ -1,3 +1,4 @@
+
 import { createTables } from '@/sync';
 import React, { useEffect } from 'react';
 import type {PropsWithChildren} from 'react';
