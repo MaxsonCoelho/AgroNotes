@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ViewStyle,
   TextStyle,
+  StyleProp,
 } from 'react-native';
 import { theme } from '@/design_system/theme';
 
@@ -12,8 +13,8 @@ interface Props {
   label: string;
   onPress: () => void;
   disabled?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 }
 
 export const Button = ({ label, onPress, disabled, style, textStyle }: Props) => {

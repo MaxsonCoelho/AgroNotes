@@ -6,10 +6,12 @@ import { Icon } from '@/design_system/components/atoms/Icon';
 import { IconButton } from '@/design_system/components';
 import { View } from 'react-native';
 import { theme } from '@/design_system/theme';
+import { LocationPermissionDeniedScreen } from '@/modules/Notes/screens/LocationPermissionDeniedScreen';
 
 export type NotesStackParamList = {
   NotesMap: undefined;
   AddNote: undefined;
+  LocationPermissionDenied: undefined;
 };
 
 const Stack = createNativeStackNavigator<NotesStackParamList>();
@@ -67,6 +69,15 @@ const NotesStack = () => {
               backgroundColor="transparent"
             />
           ),
+        })}
+      />
+      <Stack.Screen
+        name="LocationPermissionDenied"
+        component={LocationPermissionDeniedScreen}
+        options={({ navigation }) => ({
+          headerTitle: () => (
+            <Logo/>
+          )
         })}
       />
     </Stack.Navigator>

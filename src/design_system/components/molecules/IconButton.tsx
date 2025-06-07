@@ -34,6 +34,8 @@ export const IconButton = ({
           height: size,
           borderRadius: size / 2,
           backgroundColor: bgColor,
+          shadowColor: backgroundColor == 'transparent' 
+          ? 'transparent' : theme.colors.text
         },
         style,
       ]}
