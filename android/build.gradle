@@ -7,7 +7,7 @@ buildscript {
         ndkVersion = "27.1.12297006"
         kotlinVersion = "2.0.21"
     }
-    repositories {
+     repositories {
         google()
         mavenCentral()
     }
@@ -19,3 +19,17 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+// println "MAPBOX TOKEN: " + (project.hasProperty("MAPBOX_DOWNLOAD_TOKEN") ? "encontrado" : "ausente")
+
+allprojects {
+    repositories {
+        maven {
+            url 'https://api.mapbox.com/downloads/v2/releases/maven'
+            authentication { basic(BasicAuthentication) }
+            credentials {
+                username = "mapbox"
+                password = project.properties['MAPBOX_DOWNLOADS_TOKEN'] ?: ""
+            }
+        }
+    }
+}

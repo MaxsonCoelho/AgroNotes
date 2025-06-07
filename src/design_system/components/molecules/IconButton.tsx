@@ -4,10 +4,10 @@ import { Icon } from '@/design_system/components/atoms/Icon';
 import { theme } from '@/design_system/theme';
 
 interface Props {
-  icon: 'add' | 'sync' | 'back'; 
+  icon: 'add' | 'sync' | 'back';
   onPress: () => void;
   size?: number;
-  backgroundColor?: keyof typeof theme.colors;
+  backgroundColor?: keyof typeof theme.colors | 'transparent';
   style?: ViewStyle;
 }
 
@@ -18,6 +18,11 @@ export const IconButton = ({
   backgroundColor = 'primary',
   style,
 }: Props) => {
+  const bgColor =
+    backgroundColor === 'transparent'
+      ? 'transparent'
+      : theme.colors[backgroundColor];
+
   return (
     <TouchableOpacity
       testID="icon-button"
@@ -28,7 +33,7 @@ export const IconButton = ({
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: theme.colors[backgroundColor],
+          backgroundColor: bgColor,
         },
         style,
       ]}

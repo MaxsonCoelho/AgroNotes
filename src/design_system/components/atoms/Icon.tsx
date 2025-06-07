@@ -2,9 +2,9 @@ import React from 'react';
 import { SvgProps } from 'react-native-svg';
 import { View } from 'react-native';
 
-import AddIcon from '@/assets/icons/add.svg';
-import SyncIcon from '@/assets/icons/sync.svg';
-import BackIcon from '@/assets/icons/back.svg';
+import AddIcon from '@/assets/icons/icon-add.svg';
+import SyncIcon from '@/assets/icons/icon-sync.svg';
+import BackIcon from '@/assets/icons/button-back.svg';
 import Pin from '@/assets/icons/pin.svg';
 import LeafIcon from '@/assets/icons/leaf.svg';
 
@@ -19,7 +19,6 @@ const icons = {
 type IconName = keyof typeof icons;
 
 interface Props extends SvgProps {
-
   name: IconName;
   size?: number;
 }

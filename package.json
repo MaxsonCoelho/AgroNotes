@@ -15,6 +15,7 @@
     "@react-navigation/native-stack": "^7.3.14",
     "@rnmapbox/maps": "^10.1.39",
     "@types/react-native-sqlite-storage": "^6.0.5",
+    "axios": "^1.9.0",
     "react": "19.0.0",
     "react-native": "0.79.3",
     "react-native-config": "^1.5.5",
