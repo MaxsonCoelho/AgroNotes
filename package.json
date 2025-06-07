@@ -19,6 +19,7 @@
     "react": "19.0.0",
     "react-native": "0.79.3",
     "react-native-config": "^1.5.5",
+    "react-native-geolocation-service": "^5.3.1",
     "react-native-permissions": "^5.4.1",
     "react-native-reanimated": "^3.18.0",
     "react-native-restart": "^0.0.27",

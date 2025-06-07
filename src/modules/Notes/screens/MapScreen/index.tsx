@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { getAllNotes, markNoteAsSynced } from '@/sync/db/tables/notesTable';
@@ -13,13 +12,16 @@ import { theme } from '@/design_system/theme';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { NotesStackParamList } from '@/app/navigation/modules/NotesStack';
 import { styles } from './styles';
+import { useUserLocation } from '../../hooks/useUserLocation';
 
 const MapScreen = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [syncing, setSyncing] = useState(false);
   const navigation = useNavigation<NativeStackNavigationProp<NotesStackParamList>>();
 
-  const { isGranted, loading } = useLocationPermission(() => {
+  const { location: userLocation, loading: locationLoading } = useUserLocation();
+
+  const { isGranted, loading: permissionLoading } = useLocationPermission(() => {
     navigation.replace('LocationPermissionDenied');
   });
 
@@ -59,7 +61,7 @@ const MapScreen = () => {
     fetchNotes();
   }, []);
 
-  if (loading) {
+  if (permissionLoading || locationLoading || !userLocation) {
     return (
       <SafeAreaView style={styles.safe}>
         <LoadingIndicator size="large" color={theme.colors.primary} />
@@ -75,6 +77,7 @@ const MapScreen = () => {
     <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
       <MapScreenContent
         notes={notes}
+        userLocation={userLocation}
         onAddPress={() => navigation.navigate('AddNote')}
         onSyncPress={handleSync}
       />
