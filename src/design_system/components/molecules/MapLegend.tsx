@@ -21,7 +21,7 @@ export const MapLegend = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'transparent',
+    backgroundColor: '#ffffffa5',
     borderColor: theme.colors.placeholder,
     borderWidth: 1,
     borderRadius: 8,

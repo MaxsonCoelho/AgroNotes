@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MapScreen from '@/modules/Notes/screens/MapScreen';
 import { Icon } from '@/design_system/components/atoms/Icon';
 import { IconButton } from '@/design_system/components';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { theme } from '@/design_system/theme';
 import { LocationPermissionDeniedScreen } from '@/modules/Notes/screens/LocationPermissionDeniedScreen';
 import { AddNoteScreen } from '@/modules/Notes/screens/AddNoteScreen';
@@ -22,19 +22,29 @@ const NotesStack = () => {
     return (
       <View
         style={{
-          height: 80,
+          height: 70,
+          alignSelf: 'center',
           justifyContent: 'center',
-          alignItems: 'center',
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.3,
-          shadowRadius: 4,
-          elevation: 5, 
+          backgroundColor: 'transparent',
+          marginTop: Platform.OS === 'android' ? 10 : 0,
+          ...Platform.select({
+            ios: {
+              position: 'absolute',
+              bottom: -50,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.3,
+              shadowRadius: 4,
+            },
+            android: {
+              elevation: 5,
+            },
+          }),
         }}
       >
         <Icon name="leaf" size={60} />
       </View>
-    )
+    );
   }
 
   return (
