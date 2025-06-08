@@ -1,16 +1,16 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AddNoteScreen from '@/modules/Notes/screens/AddNoteScreen';
 import MapScreen from '@/modules/Notes/screens/MapScreen';
 import { Icon } from '@/design_system/components/atoms/Icon';
 import { IconButton } from '@/design_system/components';
 import { View } from 'react-native';
 import { theme } from '@/design_system/theme';
 import { LocationPermissionDeniedScreen } from '@/modules/Notes/screens/LocationPermissionDeniedScreen';
+import { AddNoteScreen } from '@/modules/Notes/screens/AddNoteScreen';
 
 export type NotesStackParamList = {
   NotesMap: undefined;
-  AddNote: undefined;
+  AddNote: { location: [number, number] };
   LocationPermissionDenied: undefined;
 };
 

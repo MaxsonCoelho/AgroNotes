@@ -7,4 +7,6 @@ export const lightColors = {
   success: '#388E3C',
   danger: '#D32F2F',
   border: '#E0E0E0',
+  warning: '#f59e0b', 
+  default: '#999999',
 };

@@ -1,42 +1,46 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button, FormTextArea, Divider } from '@/design_system/components';
+import { useFormContext } from 'react-hook-form';
 import { theme } from '@/design_system/theme';
 
 interface Props {
-  annotation: string;
-  setAnnotation: (value: string) => void;
   onSave: () => void;
   onBack: () => void;
 }
 
-export const AddNoteScreenContent = ({
-  annotation,
-  setAnnotation,
-  onSave,
-  onBack,
-}: Props) => {
+export const AddNoteScreenContent = ({ onSave, onBack }: Props) => {
+  const {
+    formState: { isSubmitting },
+  } = useFormContext();
+
   return (
     <View style={styles.container}>
       <FormTextArea
+        name="annotation"
         label="Anotação"
-        value={annotation}
-        onChangeText={setAnnotation}
         placeholder="Digite sua anotação aqui..."
+        textAreaStyle={{
+          minHeight: '50%',
+          textAlignVertical: 'top',
+          padding: theme.spacing.md,
+          backgroundColor: theme.colors.shape,
+          borderColor: theme.colors.border,
+          borderWidth: 1,
+          borderRadius: theme.radius.md,
+          color: theme.colors.text,
+        }}
       />
 
-      <Divider height={16} />
-
-      <Button label="Salvar" onPress={onSave} />
-
-      <Divider height={12} />
+      <Divider height={1} />
 
       <Button
-        label="Voltar"
-        onPress={onBack}
-        style={{ backgroundColor: theme.colors.border }}
-        textStyle={{ color: theme.colors.text }}
+        label="Salvar"
+        onPress={onSave}
+        disabled={isSubmitting}
       />
+
+      <Divider height={1} />
     </View>
   );
 };

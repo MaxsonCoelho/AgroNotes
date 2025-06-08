@@ -17,8 +17,10 @@ import { useUserLocation } from '../../hooks/useUserLocation';
 const MapScreen = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [syncing, setSyncing] = useState(false);
-  const navigation = useNavigation<NativeStackNavigationProp<NotesStackParamList>>();
+  const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
+  const [pinMode, setPinMode] = useState(false);
 
+  const navigation = useNavigation<NativeStackNavigationProp<NotesStackParamList>>();
   const { location: userLocation, loading: locationLoading } = useUserLocation();
 
   const { isGranted, loading: permissionLoading } = useLocationPermission(() => {
@@ -33,7 +35,7 @@ const MapScreen = () => {
   const handleSync = async () => {
     setSyncing(true);
 
-    setTimeout(async ()=> {
+    setTimeout(async () => {
       const unsynced = notes.filter((note) => !note.synced);
       for (const note of unsynced) {
         try {
@@ -53,8 +55,17 @@ const MapScreen = () => {
 
       await fetchNotes();
     }, 30000);
-    
+
     setSyncing(false);
+  };
+
+  const addNotes = () => {
+    if (!userLocation) return;
+
+    const location: [number, number] =
+      selectedLocation ?? [userLocation.longitude, userLocation.latitude];
+
+    navigation.navigate('AddNote', { location });
   };
 
   useEffect(() => {
@@ -78,8 +89,12 @@ const MapScreen = () => {
       <MapScreenContent
         notes={notes}
         userLocation={userLocation}
-        onAddPress={() => navigation.navigate('AddNote')}
+        onAddPress={addNotes}
         onSyncPress={handleSync}
+        selectedLocation={selectedLocation}
+        onSelectLocation={setSelectedLocation}
+        pinMode={pinMode}
+        onTogglePinMode={() => setPinMode((prev) => !prev)}
       />
       <SyncOverlay visible={syncing} />
     </SafeAreaView>

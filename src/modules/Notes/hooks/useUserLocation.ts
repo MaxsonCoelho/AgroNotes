@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
-import { useLocationPermission } from './useLocationPermission'; 
+import { useLocationPermission } from './useLocationPermission';
 
-type Coordinates = [number, number];
+type UserCoordinates = {
+  latitude: number;
+  longitude: number;
+};
 
 export const useUserLocation = () => {
-  const [location, setLocation] = useState<Coordinates | null>(null);
+  const [location, setLocation] = useState<UserCoordinates | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -20,10 +23,10 @@ export const useUserLocation = () => {
 
     Geolocation.getCurrentPosition(
       (position: GeoPosition) => {
-        setLocation([
-          position.coords.longitude,
-          position.coords.latitude,
-        ]);
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
         setLoading(false);
       },
       (err) => {
