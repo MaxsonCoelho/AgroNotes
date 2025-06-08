@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import { Feature, Geometry, Point } from 'geojson';
@@ -33,6 +33,27 @@ export const MapScreenContent = ({
   const [annotationKey, setAnnotationKey] = useState(0);
   const mapViewRef = useRef<MapboxGL.MapView>(null);
 
+  const userCoords: [number, number] = [userLocation.longitude, userLocation.latitude];
+
+  // Inicializa com localização do usuário marcada se não houver selectedLocation
+  useEffect(() => {
+    if (!pinMode && !selectedLocation) {
+      onSelectLocation(userCoords);
+    }
+
+    // Se desativar modo pin, mostra localização do usuário novamente
+    if (!pinMode && selectedLocation !== userCoords) {
+      onSelectLocation(userCoords);
+      setAnnotationKey(prev => prev + 1);
+    }
+
+    // Se ativar modo pin, remove o pin atual
+    if (pinMode && selectedLocation) {
+      onSelectLocation(null);
+      setAnnotationKey(prev => prev + 1);
+    }
+  }, [pinMode]);
+
   const handleMapPress = async (feature: Feature<Geometry>) => {
     if (!pinMode) return;
 
@@ -62,7 +83,7 @@ export const MapScreenContent = ({
       >
         <MapboxGL.Camera
           zoomLevel={14}
-          centerCoordinate={selectedLocation ?? [userLocation.longitude, userLocation.latitude]}
+          centerCoordinate={selectedLocation ?? userCoords}
         />
 
         {notes.map((note) => (
