@@ -94,6 +94,8 @@ export const MapScreenContent = ({
         <MapboxGL.Camera
           zoomLevel={14}
           centerCoordinate={selectedLocation ?? userCoords}
+          animationMode="none"
+          animationDuration={0}
         />
 
         {notes.map((note) => (
