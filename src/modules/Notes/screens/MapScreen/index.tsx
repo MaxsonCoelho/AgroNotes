@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 import { getAllNotes, markNoteAsSynced } from '@/sync/db/tables/notesTable';
 import { Note } from '@/modules/Notes/types/noteTypes';
@@ -51,9 +51,11 @@ const MapScreen = () => {
     }
   }, [permissionStatus]);
 
-  useEffect(() => {
-    fetchNotes();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchNotes(); // carrega todas as anotações novamente (inclusive as verdes)
+    }, [])
+  );
 
   useEffect(() => {
     (async () => {
@@ -83,7 +85,7 @@ const MapScreen = () => {
           longitude: note.location.longitude,
           annotation: note.annotation,
           datetime: note.datetime,
-          email: 'SEU@EMAIL.AQUI',
+          email: 'maxsoncoelho@gmail.com',
         });
         await markNoteAsSynced(note.id);
       } catch (error: any) {
