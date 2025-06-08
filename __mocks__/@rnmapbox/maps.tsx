@@ -1,28 +1,11 @@
+// __mocks__/@rnmapbox/maps.ts
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 
-export const PointAnnotation = ({ children, id, coordinate }: any) => (
-  <View
-    testID="PointAnnotation"
-    accessibilityLabel={`point-annotation-${id}`}
-    accessibilityHint={JSON.stringify(coordinate)}
-  >
-    {children}
-  </View>
-);
+export const PointAnnotation = ({ children }: any) => <View testID="mock-annotation">{children}</View>;
+export const Callout = ({ children }: any) => <View testID="mock-callout">{children}</View>;
 
-export const Callout = ({ title }: { title: string }) => (
-  <Text testID="Callout">{title}</Text>
-);
-
-const MapboxGL = {
-  __esModule: true,
-  default: {
-    PointAnnotation,
-    Callout,
-  },
+export default {
   PointAnnotation,
   Callout,
 };
-
-export default MapboxGL;

@@ -27,6 +27,7 @@ const MapScreen = () => {
   const [alertType, setAlertType] = useState<'success' | 'error'>('success');
   const [showPinInfo, setShowPinInfo] = useState(true);
   const [hasRedirected, setHasRedirected] = useState(false);
+  const [syncProgress, setSyncProgress] = useState(0);
 
   const navigation = useNavigation<NativeStackNavigationProp<NotesStackParamList>>();
 
@@ -68,12 +69,14 @@ const MapScreen = () => {
 
   const handleSync = async () => {
     setSyncing(true);
+    setSyncProgress(0);
     const allNotes = await getAllNotes();
     const unsynced = allNotes.filter((note) => !note.synced);
     let failedCount = 0;
     let failedNotes: string[] = [];
 
-    for (const note of unsynced) {
+    for (let i = 0; i < unsynced.length; i++) {
+      const note = unsynced[i];
       try {
         await syncAnnotation({
           latitude: note.location.latitude,
@@ -87,6 +90,9 @@ const MapScreen = () => {
         failedCount++;
         failedNotes.push(note.annotation.slice(0, 30));
       }
+
+      // Atualiza progresso
+      setSyncProgress((i + 1) / unsynced.length);
     }
 
     await fetchNotes();
@@ -140,7 +146,10 @@ const MapScreen = () => {
         onTogglePinMode={handleTogglePinMode}
       />
 
-      <SyncOverlay visible={syncing} />
+      <SyncOverlay 
+        visible={syncing} 
+        progress={syncProgress} 
+      />
 
       {alertVisible && (
         <Alert

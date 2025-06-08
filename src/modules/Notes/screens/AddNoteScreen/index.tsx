@@ -83,7 +83,6 @@ export const AddNoteScreen = () => {
         (
           <AddNoteScreenContent
             onSave={handleSubmit(onSubmit)}
-            onBack={() => navigation.goBack()}
           />
         )
       }

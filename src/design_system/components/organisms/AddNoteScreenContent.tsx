@@ -6,10 +6,9 @@ import { theme } from '@/design_system/theme';
 
 interface Props {
   onSave: () => void;
-  onBack: () => void;
 }
 
-export const AddNoteScreenContent = ({ onSave, onBack }: Props) => {
+export const AddNoteScreenContent = ({ onSave }: Props) => {
   const {
     formState: { isSubmitting },
   } = useFormContext();

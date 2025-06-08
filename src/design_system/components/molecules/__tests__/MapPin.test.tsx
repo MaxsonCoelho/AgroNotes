@@ -1,14 +1,14 @@
-// src/design_system/components/molecules/__tests__/MapPin.test.tsx
 import React from 'react';
 import { render } from '@testing-library/react-native';
 import { MapPin } from '../MapPin';
 import { Note } from '@/modules/Notes/types/noteTypes';
+import dayjs from 'dayjs';
 
 describe('MapPin', () => {
   const mockNote: Note = {
     id: 1,
     annotation: 'Teste de anotação',
-    datetime: '2025-06-06 10:00',
+    datetime: '2025-06-06T10:00:00Z',
     location: {
       latitude: -3.123,
       longitude: -60.023,
@@ -17,12 +17,11 @@ describe('MapPin', () => {
   };
 
   it('deve renderizar o pin com os dados corretos', () => {
-    const { getByTestId } = render(<MapPin note={mockNote} />);
-    const annotation = getByTestId('PointAnnotation');
-    const callout = getByTestId('Callout');
+    const { getByText } = render(<MapPin note={mockNote} />);
 
-    // Não podemos acessar props diretamente, então usamos texto
-    expect(callout.props.children).toContain('Teste de anotação');
-    expect(callout.props.children).toContain('2025-06-06 10:00');
+    expect(getByText('Teste de anotação')).toBeTruthy();
+
+    const formattedDate = dayjs(mockNote.datetime).format('DD/MM/YYYY HH:mm');
+    expect(getByText(formattedDate)).toBeTruthy();
   });
 });

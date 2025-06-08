@@ -71,7 +71,7 @@ export const MapScreenContent = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View testID="map-screen-content" style={styles.container}>
       <MapboxGL.MapView
         ref={mapViewRef}
         style={styles.map}
@@ -80,7 +80,7 @@ export const MapScreenContent = ({
         onPress={handleMapPress}
       >
         <MapboxGL.UserLocation
-          visible={!pinMode}
+          // visible={!pinMode}
           showsUserHeadingIndicator={false}
           onUpdate={({ coords }) => {
             const newCoords: [number, number] = [coords.longitude, coords.latitude];

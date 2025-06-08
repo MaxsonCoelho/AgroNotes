@@ -8,7 +8,7 @@ interface Props {
 
 export const MapPinDot = ({ color, style }: Props) => {
   return (
-    <View style={[styles.pin, { backgroundColor: color }, style]} />
+    <View testID="map-pin-dot" style={[styles.pin, { backgroundColor: color }, style]} />
   );
 };
 
