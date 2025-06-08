@@ -66,7 +66,7 @@ export const AddNoteScreen = () => {
       });
       setShowAlert(true);
       setIsSaving(false);
-      console.error('[💾] Erro ao salvar anotação:', error);
+      console.error('Erro ao salvar anotação:', error);
     } 
   };
 

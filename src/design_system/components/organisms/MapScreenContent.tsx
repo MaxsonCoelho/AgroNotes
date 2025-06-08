@@ -5,6 +5,7 @@ import { Feature, Geometry, Point } from 'geojson';
 
 import { MapPin, IconButton, Icon } from '@/design_system/components';
 import { Note } from '@/modules/Notes/types/noteTypes';
+import { MapLegend } from '../molecules/MapLegend';
 
 interface Props {
   notes: Note[];
@@ -126,6 +127,8 @@ export const MapScreenContent = ({
           </MapboxGL.PointAnnotation>
         )}
       </MapboxGL.MapView>
+
+      <MapLegend />
 
       <IconButton
         icon="pin"

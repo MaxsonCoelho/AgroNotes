@@ -14,6 +14,8 @@ import { NotesStackParamList } from '@/app/navigation/modules/NotesStack';
 import { styles } from './styles';
 import { useUserLocation } from '../../hooks/useUserLocation';
 import { Alert } from '@/design_system/components/molecules/Alert';
+import { PinModeInfoModal } from '@/design_system/components/molecules/PinModeInfoModal';
+import { getStorage } from '@/services/storage';
 
 const MapScreen = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -23,6 +25,7 @@ const MapScreen = () => {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState<'success' | 'error'>('success');
+  const [showPinInfo, setShowPinInfo] = useState(true);
 
   const navigation = useNavigation<NativeStackNavigationProp<NotesStackParamList>>();
   const { location: userLocation, loading: locationLoading } = useUserLocation();
@@ -96,6 +99,13 @@ const MapScreen = () => {
     fetchNotes();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      const hide = await getStorage<boolean>('hide_pin_mode_info');
+      if (!hide) setShowPinInfo(true);
+    })();
+  }, []);
+
   if (permissionLoading || locationLoading || !userLocation) {
     return (
       <SafeAreaView style={styles.safe}>
@@ -121,7 +131,9 @@ const MapScreen = () => {
         pinMode={pinMode}
         onTogglePinMode={() => setPinMode((prev) => !prev)}
       />
+
       <SyncOverlay visible={syncing} />
+
       {alertVisible && (
         <Alert
           type={alertType}
@@ -129,6 +141,16 @@ const MapScreen = () => {
           onClose={() => setAlertVisible(false)}
         />
       )}
+
+      <PinModeInfoModal
+        visible={showPinInfo}
+        onClose={() => setShowPinInfo(false)}
+        title="📍 Como funciona o Modo PIN?"
+        description="Ao ativar o Modo PIN, a navegação 
+          automática é pausada. Você pode tocar em qualquer 
+          ponto do mapa para marcar uma localização manualmente. 
+          Ideal para registrar anotações em locais específicos!"
+      />
     </SafeAreaView>
   );
 };
