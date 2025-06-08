@@ -1,4 +1,3 @@
-// hooks/useLocationPermission.ts
 import { useEffect, useState, useCallback } from 'react';
 import { Platform } from 'react-native';
 import {
@@ -9,7 +8,7 @@ import {
   PermissionStatus,
 } from 'react-native-permissions';
 
-export function useLocationPermission(onDeniedPermanently: () => void) {
+export function useUserLocationPermission(onDeniedPermanently: () => void) {
   const [isGranted, setIsGranted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [permissionStatus, setPermissionStatus] = useState<PermissionStatus | null>(null);
