@@ -20,7 +20,7 @@ interface DsAlertProps {
 
 const screenWidth = Dimensions.get('window').width;
 
-export const DsAlert: React.FC<DsAlertProps> = ({
+export const Alert: React.FC<DsAlertProps> = ({
   title,
   message,
   type = 'info',

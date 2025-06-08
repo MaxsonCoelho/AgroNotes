@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, FormProvider } from 'react-hook-form';
 import * as yup from 'yup';
@@ -9,7 +9,7 @@ import dayjs from 'dayjs';
 import { insertNote } from '@/sync/db/tables/notesTable';
 import { AddNoteScreenContent } from '@/design_system/components';
 import { styles } from './styles';
-import { DsAlert } from '@/design_system/components/molecules/DsAlert';
+import { Alert } from '@/design_system/components/molecules/Alert';
 
 const schema = yup.object().shape({
   annotation: yup.string().required('A anotação é obrigatória.'),
@@ -74,7 +74,7 @@ export const AddNoteScreen = () => {
         />
       </View>
       {showAlert && alertData && (
-      <DsAlert
+      <Alert
         message={alertData.message}
         type={alertData.type}
         onClose={() => setShowAlert(false)}
