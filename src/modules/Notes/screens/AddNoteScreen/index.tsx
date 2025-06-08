@@ -7,7 +7,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import dayjs from 'dayjs';
 
 import { insertNote } from '@/sync/db/tables/notesTable';
-import { AddNoteScreenContent } from '@/design_system/components';
+import { AddNoteScreenContent, LoadingIndicator } from '@/design_system/components';
 import { styles } from './styles';
 import { Alert } from '@/design_system/components/molecules/Alert';
 
@@ -18,6 +18,7 @@ const schema = yup.object().shape({
 export const AddNoteScreen = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertData, setAlertData] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const navigation = useNavigation();
   const route = useRoute<any>();
 
@@ -33,6 +34,8 @@ export const AddNoteScreen = () => {
   const { handleSubmit, reset } = formMethods;
 
   const onSubmit = async (data: { annotation: string }) => {
+    setIsSaving(true);
+
     try {
       await insertNote({
         id: Date.now(),
@@ -53,6 +56,7 @@ export const AddNoteScreen = () => {
 
       setTimeout(() => {
         reset();
+        setIsSaving(false);
         navigation.goBack();
       }, 1500);
     } catch (error) {
@@ -61,17 +65,28 @@ export const AddNoteScreen = () => {
         type: 'error',
       });
       setShowAlert(true);
+      setIsSaving(false);
       console.error('[💾] Erro ao salvar anotação:', error);
-    }
+    } 
   };
 
   return (
     <FormProvider {...formMethods}>
       <View style={styles.container}>
-        <AddNoteScreenContent
-          onSave={handleSubmit(onSubmit)}
-          onBack={() => navigation.goBack()}
-        />
+        {isSaving ? 
+        (
+          <View style={styles.loadingContainer}>
+            <LoadingIndicator />
+          </View>
+        )
+        :
+        (
+          <AddNoteScreenContent
+            onSave={handleSubmit(onSubmit)}
+            onBack={() => navigation.goBack()}
+          />
+        )
+      }
       </View>
       {showAlert && alertData && (
       <Alert
