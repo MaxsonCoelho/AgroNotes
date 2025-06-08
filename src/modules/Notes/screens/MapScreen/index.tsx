@@ -111,6 +111,7 @@ const MapScreen = () => {
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
       <MapScreenContent
+        key={notes.map(n => `${n.id}-${n.synced}`).join('-')}
         notes={notes}
         userLocation={userLocation}
         onAddPress={addNotes}
