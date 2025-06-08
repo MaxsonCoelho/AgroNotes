@@ -95,6 +95,16 @@ const MapScreen = () => {
     navigation.navigate('AddNote', { location });
   };
 
+  const handleTogglePinMode = () => {
+    setPinMode((prev) => {
+      const newValue = !prev;
+      setAlertType('success');
+      setAlertMessage(newValue ? 'Modo PIN ativado.' : 'Modo PIN desativado.');
+      setAlertVisible(true);
+      return newValue;
+    });
+  };
+
   useEffect(() => {
     fetchNotes();
   }, []);
@@ -102,7 +112,7 @@ const MapScreen = () => {
   useEffect(() => {
     (async () => {
       const hide = await getStorage<boolean>('hide_pin_mode_info');
-      if (!hide) setShowPinInfo(true);
+      setShowPinInfo(!hide);
     })();
   }, []);
 
@@ -129,7 +139,7 @@ const MapScreen = () => {
         selectedLocation={selectedLocation}
         onSelectLocation={setSelectedLocation}
         pinMode={pinMode}
-        onTogglePinMode={() => setPinMode((prev) => !prev)}
+        onTogglePinMode={handleTogglePinMode}
       />
 
       <SyncOverlay visible={syncing} />

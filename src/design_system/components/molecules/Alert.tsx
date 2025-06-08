@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Animated,
   Text,
@@ -27,15 +27,20 @@ export const Alert: React.FC<DsAlertProps> = ({
   onClose,
   duration = 4000,
 }) => {
-  const translateY = new Animated.Value(-100);
+  const translateY = useRef(new Animated.Value(-100)).current;
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // Reset posição inicial antes de animar
+    translateY.setValue(-100);
+
     Animated.spring(translateY, {
       toValue: 0,
       useNativeDriver: true,
     }).start();
 
-    const timer = setTimeout(() => {
+    // Timeout para esconder o alerta
+    timeoutRef.current = setTimeout(() => {
       Animated.timing(translateY, {
         toValue: -100,
         duration: 300,
@@ -45,8 +50,12 @@ export const Alert: React.FC<DsAlertProps> = ({
       });
     }, duration);
 
-    return () => clearTimeout(timer);
-  }, []);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [message]); 
 
   const backgroundColor =
     type === 'success'

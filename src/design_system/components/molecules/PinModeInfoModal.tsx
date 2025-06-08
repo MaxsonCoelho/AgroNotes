@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
 import { theme } from '@/design_system/theme';
+import { setStorage } from '@/services/storage';
 
 interface Props {
   visible: boolean;
@@ -19,6 +20,13 @@ export const PinModeInfoModal = ({
 }: Props) => {
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
+  const handleConfirm = async () => {
+    if (dontShowAgain) {
+      await setStorage('hide_pin_mode_info', true);
+    }
+    onClose(dontShowAgain);
+  };
+
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
@@ -28,13 +36,13 @@ export const PinModeInfoModal = ({
 
           <TouchableOpacity
             style={styles.checkboxContainer}
-            onPress={() => setDontShowAgain(!dontShowAgain)}
+            onPress={() => setDontShowAgain(prev => !prev)}
           >
             <View style={[styles.checkbox, dontShowAgain && styles.checkboxChecked]} />
             <Text style={styles.checkboxLabel}>Não mostrar essa mensagem novamente</Text>
           </TouchableOpacity>
 
-          <Pressable style={styles.button} onPress={() => onClose(dontShowAgain)}>
+          <Pressable style={styles.button} onPress={handleConfirm}>
             <Text style={styles.buttonText}>{buttonLabel}</Text>
           </Pressable>
         </View>

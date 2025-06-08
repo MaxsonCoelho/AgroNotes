@@ -1,6 +1,6 @@
 import React from 'react';
 import MapboxGL from '@rnmapbox/maps';
-import { View, StyleSheet, Text, Platform, Pressable } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import { Note } from '@/modules/Notes/types/noteTypes';
 import { theme } from '@/design_system/theme';
 import { MapPinDot } from '../atoms/MapPinDot';
