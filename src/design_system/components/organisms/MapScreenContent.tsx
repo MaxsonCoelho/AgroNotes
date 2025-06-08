@@ -31,28 +31,25 @@ export const MapScreenContent = ({
   onSelectLocation,
 }: Props) => {
   const [annotationKey, setAnnotationKey] = useState(0);
+  const [liveUserLocation, setLiveUserLocation] = useState<[number, number] | null>(null);
   const mapViewRef = useRef<MapboxGL.MapView>(null);
 
   const userCoords: [number, number] = [userLocation.longitude, userLocation.latitude];
 
   // Inicializa com localização do usuário marcada se não houver selectedLocation
   useEffect(() => {
-    if (!pinMode && !selectedLocation) {
-      onSelectLocation(userCoords);
-    }
-
-    // Se desativar modo pin, mostra localização do usuário novamente
-    if (!pinMode && selectedLocation !== userCoords) {
-      onSelectLocation(userCoords);
-      setAnnotationKey(prev => prev + 1);
-    }
-
-    // Se ativar modo pin, remove o pin atual
-    if (pinMode && selectedLocation) {
+    if (!pinMode) {
+      // Se a localização ao vivo estiver disponível, use ela como selectedLocation
+      if (liveUserLocation) {
+        onSelectLocation(liveUserLocation);
+      }
+    } else if (!selectedLocation) {
+      // Somente limpa ao entrar no modo pin se ainda não foi definido nenhum ponto
       onSelectLocation(null);
-      setAnnotationKey(prev => prev + 1);
     }
-  }, [pinMode]);
+
+    setAnnotationKey(prev => prev + 1);
+  }, [pinMode, liveUserLocation]);
 
   const handleMapPress = async (feature: Feature<Geometry>) => {
     if (!pinMode) return;
@@ -81,6 +78,19 @@ export const MapScreenContent = ({
         logoEnabled={false}
         onPress={handleMapPress}
       >
+        <MapboxGL.UserLocation
+          visible={!pinMode}
+          showsUserHeadingIndicator={false}
+          onUpdate={({ coords }) => {
+            const newCoords: [number, number] = [coords.longitude, coords.latitude];
+            const isValidCoords = newCoords[0] !== 0 && newCoords[1] !== 0;
+
+            if (isValidCoords) {
+              setLiveUserLocation(newCoords);
+            }
+          }}
+        />
+
         <MapboxGL.Camera
           zoomLevel={14}
           centerCoordinate={selectedLocation ?? userCoords}
@@ -89,6 +99,18 @@ export const MapScreenContent = ({
         {notes.map((note) => (
           <MapPin key={note.id.toString()} note={note} />
         ))}
+
+        {!pinMode && liveUserLocation && (
+          <MapboxGL.PointAnnotation
+            key="live-user-pin"
+            id="live-user-pin"
+            coordinate={liveUserLocation}
+          >
+            <View style={styles.pinContainer}>
+              <Icon name="pin" size={50} style={[styles.pinShadow, { opacity: 0.8 }]} />
+            </View>
+          </MapboxGL.PointAnnotation>
+        )}
 
         {selectedLocation && (
           <MapboxGL.PointAnnotation
