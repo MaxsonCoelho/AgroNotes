@@ -27,7 +27,8 @@ export const IconButton = ({
 
   return (
     <TouchableOpacity
-      testID="icon-button"
+      testID={`IconButton-${icon}`}
+      accessibilityLabel={icon}
       onPress={onPress}
       style={[
         styles.container,

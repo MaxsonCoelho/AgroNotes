@@ -12,5 +12,5 @@ export const LoadingIndicator = ({
   color = theme.colors.primary,
   ...rest
 }: Props) => {
-  return <ActivityIndicator testID="loading" size={size} color={color} {...rest} />;
+  return <ActivityIndicator testID="loading-indicator" size={size} color={color} {...rest} />;
 };

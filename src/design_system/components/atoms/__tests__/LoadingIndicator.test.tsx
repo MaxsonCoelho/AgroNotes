@@ -5,8 +5,8 @@ import { theme } from '@/design_system/theme';
 
 describe('LoadingIndicator', () => {
   it('deve renderizar com os valores padrão', () => {
-    const { getByTestId } = render(<LoadingIndicator testID="loading" />);
-    const indicator = getByTestId('loading');
+    const { getByTestId } = render(<LoadingIndicator testID="loading-indicator" />);
+    const indicator = getByTestId('loading-indicator');
 
     expect(indicator.props.size).toBe('large');
     expect(indicator.props.color).toBe(theme.colors.primary);
@@ -14,9 +14,9 @@ describe('LoadingIndicator', () => {
 
   it('deve aceitar props personalizados', () => {
     const { getByTestId } = render(
-      <LoadingIndicator testID="loading" size="small" color="red" />
+      <LoadingIndicator testID="loading-indicator" size="small" color="red" />
     );
-    const indicator = getByTestId('loading');
+    const indicator = getByTestId('loading-indicator');
 
     expect(indicator.props.size).toBe('small');
     expect(indicator.props.color).toBe('red');

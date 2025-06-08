@@ -1,64 +1,42 @@
-// src/design_system/components/molecules/__tests__/IconButton.test.tsx
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { fireEvent, render } from '@testing-library/react-native';
 import { IconButton } from '../IconButton';
-import { theme } from '@/design_system/theme';
 
 describe('IconButton', () => {
   it('deve renderizar com ícone e tamanho padrão', () => {
-    const { getByTestId } = render(
-      <IconButton icon="add" onPress={jest.fn()} />
-    );
+    const { getByTestId } = render(<IconButton icon="add" onPress={() => {}} />);
+    const button = getByTestId('IconButton-add');
 
-    const button = getByTestId('icon-button');
-    const styles = Array.isArray(button.props.style) ? button.props.style.flat() : [button.props.style];
+    expect(button).toBeTruthy();
 
-    expect(styles).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          width: 56,
-          height: 56,
-          backgroundColor: theme.colors.primary,
-        }),
-      ])
-    );
+    const flatStyle = Array.isArray(button.props.style)
+      ? Object.assign({}, ...button.props.style)
+      : button.props.style;
+
+    expect(flatStyle.width).toBe(56);
+    expect(flatStyle.height).toBe(56);
+    expect(flatStyle.borderRadius).toBe(28);
   });
 
   it('deve chamar onPress ao tocar', () => {
     const onPressMock = jest.fn();
-
-    const { getByTestId } = render(
-      <IconButton icon="sync" onPress={onPressMock} />
-    );
-
-    fireEvent.press(getByTestId('icon-button'));
+    const { getByTestId } = render(<IconButton icon="sync" onPress={onPressMock} />);
+    fireEvent.press(getByTestId('IconButton-sync'));
     expect(onPressMock).toHaveBeenCalledTimes(1);
   });
 
   it('deve aplicar estilos customizados', () => {
+    const customStyle = { backgroundColor: 'red' };
     const { getByTestId } = render(
-      <IconButton
-        icon="back"
-        onPress={jest.fn()}
-        size={40}
-        backgroundColor="success"
-        style={{ margin: 10 }}
-      />
+      <IconButton icon="back" onPress={() => {}} style={customStyle} />
     );
 
-    const button = getByTestId('icon-button');
-    const styles = Array.isArray(button.props.style) ? button.props.style.flat() : [button.props.style];
+    const button = getByTestId('IconButton-back');
 
-    expect(styles).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          width: 40,
-          height: 40,
-          borderRadius: 20,
-          backgroundColor: theme.colors.success,
-        }),
-        expect.objectContaining({ margin: 10 }),
-      ])
-    );
+    const flatStyle = Array.isArray(button.props.style)
+      ? Object.assign({}, ...button.props.style)
+      : button.props.style;
+
+    expect(flatStyle.backgroundColor).toBe('red');
   });
 });

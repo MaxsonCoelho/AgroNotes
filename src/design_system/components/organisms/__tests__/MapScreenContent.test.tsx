@@ -2,118 +2,124 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { MapScreenContent } from '../MapScreenContent';
 import { Note } from '@/modules/Notes/types/noteTypes';
+import MapboxGL from '@rnmapbox/maps';
 
-// Mocks do Mapbox
 jest.mock('@rnmapbox/maps', () => {
   const React = require('react');
-  const { View, Text } = require('react-native');
-
-  const MapView = ({ children }: any) => <View testID="MapView">{children}</View>;
-  const Camera = ({ centerCoordinate }: any) => (
-    <Text testID="Camera">{`Camera: ${centerCoordinate?.join(',')}`}</Text>
-  );
-
   return {
     __esModule: true,
     default: {
-      MapView,
-      Camera,
+      MapView: ({ children, ...props }: any) => <>{children}</>,
+      UserLocation: ({ onUpdate }: any) => {
+        // Simula localização do usuário
+        React.useEffect(() => {
+          onUpdate({ coords: { latitude: -3.1, longitude: -60.0 } });
+        }, []);
+        return null;
+      },
+      Camera: () => null,
+      PointAnnotation: ({ children }: any) => <>{children}</>,
+      Callout: ({ children }: any) => <>{children}</>,
     },
-    MapView,
-    Camera,
   };
 });
 
-// Mock de MapPin e IconButton
-jest.mock('@/design_system/components', () => {
-  const { Text, View, TouchableOpacity } = require('react-native');
-  const originalModule = jest.requireActual('@/design_system/components');
+jest.mock('../../molecules/MapLegend.tsx', () => ({
+  MapLegend: () => <></>,
+}));
 
-  return {
-    ...originalModule,
-    MapPin: ({ note }: { note: Note }) => (
-      <Text testID="MapPin">{note.annotation}</Text>
-    ),
-    IconButton: ({
-      icon,
-      onPress,
-      accessibilityLabel,
-    }: {
-      icon: string;
-      onPress: () => void;
-      accessibilityLabel?: string;
-    }) => (
-      <TouchableOpacity
-        testID={`IconButton-${icon}`}
-        onPress={onPress}
-        accessibilityLabel={accessibilityLabel ?? icon}
-      >
-        <Text>{icon}</Text>
-      </TouchableOpacity>
-    ),
-  };
-});
+jest.mock('@/design_system/components/atoms/Icon', () => ({
+  Icon: ({ name }: { name: string }) => <>{name}</>,
+}));
 
 describe('MapScreenContent', () => {
-  const mockOnAddPress = jest.fn();
-  const mockOnSyncPress = jest.fn();
-
   const mockNotes: Note[] = [
     {
       id: 1,
-      annotation: 'Nota 1',
-      datetime: '2023-01-01T12:00:00Z',
-      location: { latitude: -23.55, longitude: -46.63 },
+      annotation: 'Nota de teste',
+      datetime: '2025-06-08 12:00:00',
+      location: { latitude: -3.1, longitude: -60.01 },
       synced: false,
-    },
-    {
-      id: 2,
-      annotation: 'Nota 2',
-      datetime: '2023-01-02T14:30:00Z',
-      location: { latitude: -23.56, longitude: -46.62 },
-      synced: true,
     },
   ];
 
-  it('deve renderizar o mapa, pins e botões corretamente', () => {
-    const { getByTestId, getAllByTestId, getByText } = render(
-      <MapScreenContent
-        notes={mockNotes}
-        onAddPress={mockOnAddPress}
-        onSyncPress={mockOnSyncPress}
-      />
-    );
+  const baseProps = {
+    notes: mockNotes,
+    userLocation: { latitude: -3.1, longitude: -60.0 },
+    onAddPress: jest.fn(),
+    onSyncPress: jest.fn(),
+    pinMode: false,
+    onTogglePinMode: jest.fn(),
+    selectedLocation: null,
+    onSelectLocation: jest.fn(),
+  };
 
-    expect(getByTestId('MapView')).toBeTruthy();
-    expect(getByTestId('Camera')).toBeTruthy();
-    expect(getAllByTestId('MapPin')).toHaveLength(2);
-    expect(getByText('Nota 1')).toBeTruthy();
-    expect(getByText('Nota 2')).toBeTruthy();
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('deve chamar onAddPress ao clicar no botão de adicionar', () => {
-    const { getByLabelText } = render(
-      <MapScreenContent
-        notes={mockNotes}
-        onAddPress={mockOnAddPress}
-        onSyncPress={mockOnSyncPress}
-      />
+  it('renderiza corretamente com todos os elementos principais', () => {
+    const { getByTestId, getByTestId: id } = render(
+      <MapScreenContent {...baseProps} />
     );
 
-    fireEvent.press(getByLabelText('add'));
-    expect(mockOnAddPress).toHaveBeenCalled();
+    expect(getByTestId('map-screen-content')).toBeTruthy();
+    expect(id('IconButton-add')).toBeTruthy();
+    expect(id('IconButton-sync')).toBeTruthy();
+    expect(id('IconButton-pin')).toBeTruthy();
   });
 
-  it('deve chamar onSyncPress ao clicar no botão de sincronizar', () => {
-    const { getByLabelText } = render(
+  it('chama onAddPress ao tocar no botão "add"', () => {
+    const { getByTestId } = render(<MapScreenContent {...baseProps} />);
+    fireEvent.press(getByTestId('IconButton-add'));
+    expect(baseProps.onAddPress).toHaveBeenCalled();
+  });
+
+  it('chama onSyncPress ao tocar no botão "sync"', () => {
+    const { getByTestId } = render(<MapScreenContent {...baseProps} />);
+    fireEvent.press(getByTestId('IconButton-sync'));
+    expect(baseProps.onSyncPress).toHaveBeenCalled();
+  });
+
+  it('chama onTogglePinMode ao tocar no botão "pin"', () => {
+    const { getByTestId } = render(<MapScreenContent {...baseProps} />);
+    fireEvent.press(getByTestId('IconButton-pin'));
+    expect(baseProps.onTogglePinMode).toHaveBeenCalled();
+  });
+
+  it('chama onSelectLocation quando pinMode é falso e localização é atualizada', () => {
+    const onSelectLocation = jest.fn();
+
+    render(
       <MapScreenContent
-        notes={mockNotes}
-        onAddPress={mockOnAddPress}
-        onSyncPress={mockOnSyncPress}
+        {...baseProps}
+        onSelectLocation={onSelectLocation}
+        selectedLocation={null}
       />
     );
 
-    fireEvent.press(getByLabelText('sync'));
-    expect(mockOnSyncPress).toHaveBeenCalled();
+    // useEffect simulado no mock já chama onUpdate com localização válida
+    expect(onSelectLocation).toHaveBeenCalledWith([-60.0, -3.1]);
+  });
+
+  it('não chama onSelectLocation se pinMode estiver ativo', () => {
+    const onSelectLocation = jest.fn();
+
+    render(
+      <MapScreenContent
+        {...baseProps}
+        pinMode={true}
+        selectedLocation={[0, 0]} 
+        onSelectLocation={onSelectLocation}
+      />
+    );
+
+    expect(onSelectLocation).not.toHaveBeenCalled();
+  });
+
+  it('mostra pino de anotação com conteúdo correto', () => {
+    const { getByText } = render(<MapScreenContent {...baseProps} />);
+    expect(getByText('Nota de teste')).toBeTruthy();
+    expect(getByText('08/06/2025 12:00')).toBeTruthy();
   });
 });

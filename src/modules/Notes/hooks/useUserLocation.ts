@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
-import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
-import { useLocationPermission } from './useLocationPermission';
+import Geolocation, { GeoPosition, GeoError } from 'react-native-geolocation-service';
+import { useUserLocationPermission } from './useLocationPermission';
 
 type UserCoordinates = {
   latitude: number;
@@ -13,7 +13,7 @@ export const useUserLocation = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const { isGranted, loading: permissionLoading } = useLocationPermission(() => {
+  const { isGranted, loading: permissionLoading } = useUserLocationPermission(() => {
     setError('Permissão negada permanentemente.');
     setLoading(false);
   });
@@ -29,7 +29,7 @@ export const useUserLocation = () => {
         });
         setLoading(false);
       },
-      (err) => {
+      (err: GeoError) => {
         console.warn('Erro ao obter localização:', err);
         setError(err.message);
         setLoading(false);
@@ -44,5 +44,10 @@ export const useUserLocation = () => {
     );
   }, [isGranted, permissionLoading]);
 
-  return { location, error, loading };
+  return {
+    location,
+    error,
+    loading: loading || permissionLoading,
+    isGranted,
+  };
 };

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 import { getAllNotes, markNoteAsSynced } from '@/sync/db/tables/notesTable';
 import { Note } from '@/modules/Notes/types/noteTypes';
@@ -7,7 +7,6 @@ import { syncAnnotation } from '@/modules/Notes/services/noteService';
 
 import { LoadingIndicator, MapScreenContent, SyncOverlay } from '@/design_system/components';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocationPermission } from '../../hooks/useLocationPermission';
 import { theme } from '@/design_system/theme';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { NotesStackParamList } from '@/app/navigation/modules/NotesStack';
@@ -16,6 +15,7 @@ import { useUserLocation } from '../../hooks/useUserLocation';
 import { Alert } from '@/design_system/components/molecules/Alert';
 import { PinModeInfoModal } from '@/design_system/components/molecules/PinModeInfoModal';
 import { getStorage } from '@/services/storage';
+import { useUserLocationPermission } from '../../hooks/useLocationPermission';
 
 const MapScreen = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -26,13 +26,43 @@ const MapScreen = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState<'success' | 'error'>('success');
   const [showPinInfo, setShowPinInfo] = useState(true);
+  const [hasRedirected, setHasRedirected] = useState(false);
+  const [syncProgress, setSyncProgress] = useState(0);
 
   const navigation = useNavigation<NativeStackNavigationProp<NotesStackParamList>>();
-  const { location: userLocation, loading: locationLoading } = useUserLocation();
 
-  const { isGranted, loading: permissionLoading } = useLocationPermission(() => {
-    navigation.replace('LocationPermissionDenied');
+  const {
+    isGranted: permissionGranted,
+    loading: permissionLoading,
+    permissionStatus,
+  } = useUserLocationPermission(() => {
+    if (!hasRedirected) {
+      setHasRedirected(true);
+      navigation.replace('LocationPermissionDenied');
+    }
   });
+
+
+  const { location: userLocation, loading: locationLoading, isGranted } = useUserLocation();
+
+  useEffect(() => {
+    if (permissionStatus === 'blocked' || permissionStatus === 'denied') {
+      navigation.replace('LocationPermissionDenied');
+    }
+  }, [permissionStatus]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchNotes(); // carrega todas as anotações novamente (inclusive as verdes)
+    }, [])
+  );
+
+  useEffect(() => {
+    (async () => {
+      const hide = await getStorage<boolean>('hide_pin_mode_info');
+      setShowPinInfo(!hide);
+    })();
+  }, []);
 
   const fetchNotes = async () => {
     const all = await getAllNotes();
@@ -41,57 +71,48 @@ const MapScreen = () => {
 
   const handleSync = async () => {
     setSyncing(true);
+    setSyncProgress(0);
+    const allNotes = await getAllNotes();
+    const unsynced = allNotes.filter((note) => !note.synced);
     let failedCount = 0;
     let failedNotes: string[] = [];
 
-    // Garantir que os dados estão atualizados
-    const allNotes = await getAllNotes();
-    setNotes(allNotes);
-
-    const unsynced = allNotes.filter((note) => !note.synced);
-
-    for (const note of unsynced) {
+    for (let i = 0; i < unsynced.length; i++) {
+      const note = unsynced[i];
       try {
         await syncAnnotation({
           latitude: note.location.latitude,
           longitude: note.location.longitude,
           annotation: note.annotation,
           datetime: note.datetime,
-          email: 'SEU@EMAIL.AQUI',
+          email: 'maxsoncoelho@gmail.com',
         });
-
         await markNoteAsSynced(note.id);
       } catch (error: any) {
         failedCount++;
         failedNotes.push(note.annotation.slice(0, 30));
-        console.warn('Erro ao sincronizar:', error);
       }
+
+      // Atualiza progresso
+      setSyncProgress((i + 1) / unsynced.length);
     }
 
-    await fetchNotes(); // Atualiza com notas sincronizadas
+    await fetchNotes();
     setSyncing(false);
 
-    if (failedCount > 0) {
-      setAlertType('error');
-      setAlertMessage(
-        `Erro ao sincronizar ${failedCount} anotação(ões). ${
-          failedNotes.length > 0 ? `Ex: "${failedNotes[0]}"` : ''
-        }`
-      );
-    } else {
-      setAlertType('success');
-      setAlertMessage(`Sincronização concluída! ${unsynced.length} anotação(ões) enviadas.`);
-    }
-
+    setAlertType(failedCount > 0 ? 'error' : 'success');
+    setAlertMessage(
+      failedCount > 0
+        ? `Erro ao sincronizar ${failedCount} anotação(ões). ${failedNotes[0] ?? ''}`
+        : `Sincronização concluída! ${unsynced.length} anotação(ões) enviadas.`
+    );
     setAlertVisible(true);
   };
 
   const addNotes = () => {
     if (!userLocation) return;
-
     const location: [number, number] =
       selectedLocation ?? [userLocation.longitude, userLocation.latitude];
-
     navigation.navigate('AddNote', { location });
   };
 
@@ -105,27 +126,12 @@ const MapScreen = () => {
     });
   };
 
-  useEffect(() => {
-    fetchNotes();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      const hide = await getStorage<boolean>('hide_pin_mode_info');
-      setShowPinInfo(!hide);
-    })();
-  }, []);
-
   if (permissionLoading || locationLoading || !userLocation) {
     return (
       <SafeAreaView style={styles.safe}>
         <LoadingIndicator size="large" color={theme.colors.primary} />
       </SafeAreaView>
     );
-  }
-
-  if (!isGranted) {
-    return null;
   }
 
   return (
@@ -142,7 +148,10 @@ const MapScreen = () => {
         onTogglePinMode={handleTogglePinMode}
       />
 
-      <SyncOverlay visible={syncing} />
+      <SyncOverlay 
+        visible={syncing} 
+        progress={syncProgress} 
+      />
 
       {alertVisible && (
         <Alert
