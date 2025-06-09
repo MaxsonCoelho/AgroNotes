@@ -171,10 +171,25 @@ const MapScreen = () => {
   };
 
   const addNotes = () => {
-    if (!userLocation) return;
-    const location: [number, number] =
-      selectedLocation ?? [userLocation.longitude, userLocation.latitude];
-    navigation.navigate('AddNote', { location });
+    if (selectedLocation) {
+      navigation.navigate('AddNote', { location: selectedLocation });
+      return;
+    }
+
+    if (
+      !userLocation ||
+      typeof userLocation.latitude !== 'number' ||
+      typeof userLocation.longitude !== 'number'
+    ) {
+      setAlertType('error');
+      setAlertMessage('Localização não disponível. Ative o GPS ou toque no mapa para selecionar um ponto.');
+      setAlertVisible(true);
+      return;
+    }
+
+    navigation.navigate('AddNote', {
+      location: [userLocation.longitude, userLocation.latitude],
+    });
   };
 
   const handleTogglePinMode = () => {
