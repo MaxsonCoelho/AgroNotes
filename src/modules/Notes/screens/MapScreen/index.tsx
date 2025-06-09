@@ -17,8 +17,9 @@ import { Alert } from '@/design_system/components/molecules/Alert';
 import { PinModeInfoModal } from '@/design_system/components/molecules/PinModeInfoModal';
 import { getStorage } from '@/services/storage';
 import { useUserLocationPermission } from '../../hooks/useLocationPermission';
-import { observeNetwork } from '@/sync';
-import { stopObserving } from 'react-native-geolocation-service';
+import { observeNetwork, stopObservingNetwork } from '@/sync';
+import { useOfflineMapStatus } from '../../hooks/useOfflineMapStatus';
+import { BackHandler, Platform } from 'react-native';
 
 const MapScreen = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -33,10 +34,13 @@ const MapScreen = () => {
   const [syncProgress, setSyncProgress] = useState(0);
   const [isConnected, setIsConnected] = useState(true);
   const [refreshKey, setRefreshKey] = useState(Date.now());
+  const [showOfflineBlockModal, setShowOfflineBlockModal] = useState(false);
 
   const alreadyDownloadedRef = useRef(false);
 
   const navigation = useNavigation<NativeStackNavigationProp<NotesStackParamList>>();
+
+  const { isOfflineWithoutMap, checked: offlineStatusChecked } = useOfflineMapStatus();
 
   const {
     loading: permissionLoading,
@@ -49,6 +53,12 @@ const MapScreen = () => {
   });
 
   const { location: userLocation } = useUserLocation();
+
+  useEffect(() => {
+    if (permissionStatus === 'blocked' || permissionStatus === 'denied') {
+      navigation.replace('LocationPermissionDenied');
+    }
+  }, [permissionStatus]);
 
   useEffect(() => {
     let previousConnection: boolean | null = null;
@@ -79,15 +89,15 @@ const MapScreen = () => {
     });
 
     return () => {
-      stopObserving();
+      stopObservingNetwork
     };
   }, []);
 
   useEffect(() => {
-    if (permissionStatus === 'blocked' || permissionStatus === 'denied') {
-      navigation.replace('LocationPermissionDenied');
+    if (offlineStatusChecked && isOfflineWithoutMap) {
+      setShowOfflineBlockModal(true);
     }
-  }, [permissionStatus]);
+  }, [offlineStatusChecked, isOfflineWithoutMap]);
 
   useFocusEffect(
     useCallback(() => {
@@ -304,6 +314,21 @@ const MapScreen = () => {
           automática é pausada. Você pode tocar em qualquer 
           ponto do mapa para marcar uma localização manualmente. 
           Ideal para registrar anotações em locais específicos!"
+      />
+      <PinModeInfoModal
+        visible={showOfflineBlockModal}
+        onClose={() => {
+          if (Platform.OS === 'android') {
+            BackHandler.exitApp(); 
+          } else {
+            setShowOfflineBlockModal(false); 
+          }
+        }}
+        title="📡 Mapa indisponível"
+        description="Você está sem internet e ainda não possui o mapa salvo offline. 
+        Conecte-se à internet e abra o app pelo menos uma vez para usá-lo offline no futuro."
+        buttonLabel="Fechar o App"
+        activeCheck={false}
       />
     </SafeAreaView>
   );

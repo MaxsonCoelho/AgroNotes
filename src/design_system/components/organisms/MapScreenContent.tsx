@@ -6,6 +6,7 @@ import { Feature, Geometry, Point } from 'geojson';
 import { MapPin, IconButton, Icon } from '@/design_system/components';
 import { Note } from '@/modules/Notes/types/noteTypes';
 import { MapLegend } from '../molecules/MapLegend';
+import { useAutoCameraControl } from '@/modules/Notes/hooks/useAutoCameraControl';
 
 interface Props {
   notes: Note[];
@@ -33,19 +34,28 @@ export const MapScreenContent = ({
 }: Props) => {
   const [annotationKey, setAnnotationKey] = useState(0);
   const [liveUserLocation, setLiveUserLocation] = useState<[number, number] | null>(null);
+
+  const cameraRef = useRef<MapboxGL.Camera>(null);
   const mapViewRef = useRef<MapboxGL.MapView>(null);
 
   const userCoords: [number, number] = [userLocation.longitude, userLocation.latitude];
 
-  // Inicializa com localização do usuário marcada se não houver selectedLocation
+  const {
+    autoCameraEnabled,
+    focusOnUser,
+    onRegionDidChange,
+  } = useAutoCameraControl({
+    selectedLocation,
+    userCoords,
+    cameraRef,
+  });
+
+  // Atualiza selectedLocation com a posição atual quando não estiver no modo pin
   useEffect(() => {
     if (!pinMode) {
-      // Se a localização ao vivo estiver disponível, use ela como selectedLocation
-      if (liveUserLocation) {
-        onSelectLocation(liveUserLocation);
-      }
+      if (liveUserLocation) onSelectLocation(liveUserLocation);
+      focusOnUser(liveUserLocation ?? userCoords);
     } else if (!selectedLocation) {
-      // Somente limpa ao entrar no modo pin se ainda não foi definido nenhum ponto
       onSelectLocation(null);
     }
 
@@ -78,9 +88,10 @@ export const MapScreenContent = ({
         attributionEnabled={false}
         logoEnabled={false}
         onPress={handleMapPress}
+        onRegionDidChange={onRegionDidChange}
       >
         <MapboxGL.UserLocation
-          // visible={!pinMode}
+          visible={!pinMode}
           showsUserHeadingIndicator={false}
           onUpdate={({ coords }) => {
             const newCoords: [number, number] = [coords.longitude, coords.latitude];
@@ -93,8 +104,10 @@ export const MapScreenContent = ({
         />
 
         <MapboxGL.Camera
-          zoomLevel={14}
-          centerCoordinate={selectedLocation ?? userCoords}
+          ref={cameraRef}
+          zoomLevel={autoCameraEnabled ? 16 : undefined}
+          centerCoordinate={autoCameraEnabled ? (selectedLocation ?? userCoords) : undefined}
+          followUserLocation={false}
           animationMode="none"
           animationDuration={0}
         />
@@ -132,7 +145,10 @@ export const MapScreenContent = ({
 
       <IconButton
         icon="pin"
-        onPress={onTogglePinMode}
+        onPress={() => {
+          onTogglePinMode();
+          focusOnUser();
+        }}
         style={{
           ...styles.pinModeButton,
           ...(pinMode ? styles.pinModeActive : {}),

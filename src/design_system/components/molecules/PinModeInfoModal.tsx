@@ -9,6 +9,7 @@ interface Props {
   title: string;
   description: string;
   buttonLabel?: string;
+  activeCheck?: boolean;
 }
 
 export const PinModeInfoModal = ({
@@ -17,8 +18,9 @@ export const PinModeInfoModal = ({
   title,
   description,
   buttonLabel = 'Entendi',
+  activeCheck = true
 }: Props) => {
-  const [dontShowAgain, setDontShowAgain] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
 
   const handleConfirm = async () => {
     if (dontShowAgain) {
@@ -34,13 +36,15 @@ export const PinModeInfoModal = ({
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.text}>{description}</Text>
 
-          <TouchableOpacity
-            style={styles.checkboxContainer}
-            onPress={() => setDontShowAgain(prev => !prev)}
-          >
-            <View style={[styles.checkbox, dontShowAgain && styles.checkboxChecked]} />
-            <Text style={styles.checkboxLabel}>Não mostrar essa mensagem novamente</Text>
-          </TouchableOpacity>
+          {activeCheck && (
+              <TouchableOpacity
+                style={styles.checkboxContainer}
+                onPress={() => setDontShowAgain(prev => !prev)}
+              >
+                <View style={[styles.checkbox, dontShowAgain && styles.checkboxChecked]} />
+                <Text style={styles.checkboxLabel}>Não mostrar essa mensagem novamente</Text>
+              </TouchableOpacity>
+          )}
 
           <Pressable style={styles.button} onPress={handleConfirm}>
             <Text style={styles.buttonText}>{buttonLabel}</Text>
