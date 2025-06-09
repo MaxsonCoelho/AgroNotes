@@ -19,14 +19,17 @@ export const useUserLocation = () => {
   });
 
   useEffect(() => {
+    let watchId: number | null = null;
+
     if (!isGranted || permissionLoading) return;
 
-    Geolocation.getCurrentPosition(
+    watchId = Geolocation.watchPosition(
       (position: GeoPosition) => {
         setLocation({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         });
+        setError(null);
         setLoading(false);
       },
       (err: GeoError) => {
@@ -36,12 +39,19 @@ export const useUserLocation = () => {
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 10000,
+        distanceFilter: 1,
+        interval: 5000,
+        fastestInterval: 2000,
         forceRequestLocation: true,
         showLocationDialog: Platform.OS === 'android',
       }
     );
+
+    return () => {
+      if (watchId !== null) {
+        Geolocation.clearWatch(watchId);
+      }
+    };
   }, [isGranted, permissionLoading]);
 
   return {

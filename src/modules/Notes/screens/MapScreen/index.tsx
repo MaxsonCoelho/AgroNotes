@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 import { getAllNotes, markNoteAsSynced } from '@/sync/db/tables/notesTable';
 import { Note } from '@/modules/Notes/types/noteTypes';
 import { syncAnnotation } from '@/modules/Notes/services/noteService';
+import MapboxGL from '@rnmapbox/maps';
 
 import { LoadingIndicator, MapScreenContent, SyncOverlay } from '@/design_system/components';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,6 +17,8 @@ import { Alert } from '@/design_system/components/molecules/Alert';
 import { PinModeInfoModal } from '@/design_system/components/molecules/PinModeInfoModal';
 import { getStorage } from '@/services/storage';
 import { useUserLocationPermission } from '../../hooks/useLocationPermission';
+import { observeNetwork } from '@/sync';
+import { stopObserving } from 'react-native-geolocation-service';
 
 const MapScreen = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -28,11 +31,14 @@ const MapScreen = () => {
   const [showPinInfo, setShowPinInfo] = useState(true);
   const [hasRedirected, setHasRedirected] = useState(false);
   const [syncProgress, setSyncProgress] = useState(0);
+  const [isConnected, setIsConnected] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(Date.now());
+
+  const alreadyDownloadedRef = useRef(false);
 
   const navigation = useNavigation<NativeStackNavigationProp<NotesStackParamList>>();
 
   const {
-    isGranted: permissionGranted,
     loading: permissionLoading,
     permissionStatus,
   } = useUserLocationPermission(() => {
@@ -42,8 +48,40 @@ const MapScreen = () => {
     }
   });
 
+  const { location: userLocation } = useUserLocation();
 
-  const { location: userLocation, loading: locationLoading, isGranted } = useUserLocation();
+  useEffect(() => {
+    let previousConnection: boolean | null = null;
+
+    observeNetwork((connected) => {
+      setIsConnected(connected);
+
+      if (previousConnection === null) {
+        previousConnection = connected;
+        return;
+      }
+
+      if (!connected && previousConnection !== false) {
+        setAlertType('error');
+        setAlertMessage(
+          'Você está offline. Acesse o mapa pelo menos uma vez com internet para poder usá-lo offline depois.'
+        );
+        setAlertVisible(true);
+      }
+
+      if (connected && previousConnection === false) {
+        setAlertType('success');
+        setAlertMessage('Conexão restabelecida! Agora você pode sincronizar suas anotações.');
+        setAlertVisible(true);
+      }
+
+      previousConnection = connected;
+    });
+
+    return () => {
+      stopObserving();
+    };
+  }, []);
 
   useEffect(() => {
     if (permissionStatus === 'blocked' || permissionStatus === 'denied') {
@@ -64,12 +102,36 @@ const MapScreen = () => {
     })();
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (
+        !alreadyDownloadedRef.current &&
+        userLocation &&
+        userLocation.latitude !== undefined &&
+        userLocation.longitude !== undefined
+      ) {
+        alreadyDownloadedRef.current = true;
+        downloadOfflineMapTiles();
+      }
+    }, [userLocation])
+  );
+
   const fetchNotes = async () => {
     const all = await getAllNotes();
     setNotes(all);
+    setRefreshKey(Date.now()); 
   };
 
   const handleSync = async () => {
+    if (!isConnected) {
+      setAlertType('error');
+      setAlertMessage(
+        'Sem conexão com a internet. É necessário estar online pelo menos uma vez para sincronizar as anotações.'
+      );
+      setAlertVisible(true);
+      return;
+    }
+
     setSyncing(true);
     setSyncProgress(0);
     const allNotes = await getAllNotes();
@@ -93,7 +155,6 @@ const MapScreen = () => {
         failedNotes.push(note.annotation.slice(0, 30));
       }
 
-      // Atualiza progresso
       setSyncProgress((i + 1) / unsynced.length);
     }
 
@@ -126,7 +187,64 @@ const MapScreen = () => {
     });
   };
 
-  if (permissionLoading || locationLoading || !userLocation) {
+  const downloadOfflineMapTiles = async () => {
+    const currentLocation = userLocation 
+      ? { latitude: userLocation.latitude, longitude: userLocation.longitude } 
+      : null;
+
+    if (
+      !currentLocation ||
+      typeof currentLocation.latitude !== 'number' ||
+      typeof currentLocation.longitude !== 'number'
+    ) {
+      console.warn('Localização atual indisponível ou inválida.');
+      return;
+    }
+
+    const BUFFER = 0.01;
+
+    const southwest: [number, number] = [
+      parseFloat((currentLocation.longitude - BUFFER).toFixed(6)),
+      parseFloat((currentLocation.latitude - BUFFER).toFixed(6)),
+    ];
+
+    const northeast: [number, number] = [
+      parseFloat((currentLocation.longitude + BUFFER).toFixed(6)),
+      parseFloat((currentLocation.latitude + BUFFER).toFixed(6)),
+    ];
+
+    const latDiff = Math.abs(northeast[1] - southwest[1]);
+    const lonDiff = Math.abs(northeast[0] - southwest[0]);
+
+    if (latDiff < 0.001 || lonDiff < 0.001) {
+      console.warn('Área muito pequena para criar o pack offline. Operação cancelada.');
+      return;
+    }
+
+    const bounds: [[number, number], [number, number]] = [southwest, northeast];
+
+    try {
+      await MapboxGL.offlineManager.createPack(
+        {
+          name: `map-pack-${Date.now()}`,
+          styleURL: MapboxGL.StyleURL.Street,
+          minZoom: 12,
+          maxZoom: 16,
+          bounds,
+        },
+        (pack) => {
+          console.log('Pack criado com sucesso:', pack);
+        },
+        (err) => {
+          console.error('Erro ao criar pack offline:', err);
+        }
+      );
+    } catch (error) {
+      console.error('Erro geral ao criar o pack offline:', error);
+    }
+  };
+
+  if (permissionLoading) {
     return (
       <SafeAreaView style={styles.safe}>
         <LoadingIndicator size="large" color={theme.colors.primary} />
@@ -137,9 +255,11 @@ const MapScreen = () => {
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
       <MapScreenContent
-        key={notes.map(n => `${n.id}-${n.synced}`).join('-')}
+        key={refreshKey}
         notes={notes}
-        userLocation={userLocation}
+        userLocation={
+          userLocation ?? { latitude: 0, longitude: 0 }
+        }
         onAddPress={addNotes}
         onSyncPress={handleSync}
         selectedLocation={selectedLocation}

@@ -22,7 +22,7 @@ export const AddNoteScreen = () => {
   const navigation = useNavigation();
   const route = useRoute<any>();
 
-  const selectedLocation: [number, number] = route.params?.location;
+  const selectedLocation = route.params?.location as [number, number] | undefined;
 
   const formMethods = useForm({
     resolver: yupResolver(schema),
@@ -33,6 +33,25 @@ export const AddNoteScreen = () => {
 
   const { handleSubmit, reset } = formMethods;
 
+  if (
+    !selectedLocation ||
+    selectedLocation.length !== 2 ||
+    typeof selectedLocation[0] !== 'number' ||
+    typeof selectedLocation[1] !== 'number'
+  ) {
+    return (
+      <View style={styles.container}>
+        <Alert
+          message="Localização inválida. Volte e tente novamente quando a localização estiver disponível."
+          type="error"
+          onClose={() => navigation.goBack()}
+        />
+      </View>
+    );
+  }
+
+  const [longitude, latitude] = selectedLocation;
+
   const onSubmit = async (data: { annotation: string }) => {
     setIsSaving(true);
 
@@ -41,8 +60,8 @@ export const AddNoteScreen = () => {
         id: Date.now(),
         annotation: data.annotation,
         location: {
-          latitude: selectedLocation[1],
-          longitude: selectedLocation[0],
+          latitude,
+          longitude,
         },
         datetime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         synced: false,
@@ -54,11 +73,9 @@ export const AddNoteScreen = () => {
       });
       setShowAlert(true);
 
-      setTimeout(() => {
-        reset();
-        setIsSaving(false);
-        navigation.goBack();
-      }, 1500);
+      reset();
+      setIsSaving(false);
+      navigation.goBack();
     } catch (error) {
       setAlertData({
         message: 'Erro ao salvar anotação. Verifique sua conexão.',
@@ -67,33 +84,28 @@ export const AddNoteScreen = () => {
       setShowAlert(true);
       setIsSaving(false);
       console.error('Erro ao salvar anotação:', error);
-    } 
+    }
   };
 
   return (
     <FormProvider {...formMethods}>
       <View style={styles.container}>
-        {isSaving ? 
-        (
+        {isSaving ? (
           <View style={styles.loadingContainer}>
             <LoadingIndicator />
           </View>
-        )
-        :
-        (
-          <AddNoteScreenContent
-            onSave={handleSubmit(onSubmit)}
-          />
-        )
-      }
+        ) : (
+          <AddNoteScreenContent onSave={handleSubmit(onSubmit)} />
+        )}
       </View>
+
       {showAlert && alertData && (
-      <Alert
-        message={alertData.message}
-        type={alertData.type}
-        onClose={() => setShowAlert(false)}
-      />
-    )}
+        <Alert
+          message={alertData.message}
+          type={alertData.type}
+          onClose={() => setShowAlert(false)}
+        />
+      )}
     </FormProvider>
   );
 };
