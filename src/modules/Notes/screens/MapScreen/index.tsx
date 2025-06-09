@@ -40,7 +40,11 @@ const MapScreen = () => {
 
   const navigation = useNavigation<NativeStackNavigationProp<NotesStackParamList>>();
 
-  const { isOfflineWithoutMap, checked: offlineStatusChecked } = useOfflineMapStatus();
+  const { 
+    isOfflineWithoutMap, 
+    checked: offlineStatusChecked, 
+    recheckOfflineStatus 
+  } = useOfflineMapStatus();
 
   const {
     loading: permissionLoading,
@@ -259,6 +263,7 @@ const MapScreen = () => {
         },
         (pack) => {
           console.log('Pack criado com sucesso:', pack);
+          recheckOfflineStatus(); 
         },
         (err) => {
           console.error('Erro ao criar pack offline:', err);
